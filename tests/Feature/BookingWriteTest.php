@@ -29,6 +29,7 @@ class BookingWriteTest extends TestCase
 
     public function test_creates_booking_with_authenticated_author_and_utc_dates(): void
     {
+        $this->travelTo(now()->setDate(2026, 11, 11)->setTime(12, 0));
         $user = User::factory()->create();
         $other = User::factory()->create();
         Sanctum::actingAs($user);
@@ -39,8 +40,16 @@ class BookingWriteTest extends TestCase
 
         $response = $this->postJson('/api/bookings', $payload);
 
-        $response->assertCreated()->assertJsonPath('user_id', $user->id)
-            ->assertJsonPath('starts_at', '2026-11-10T07:00:00.000000Z');
+        $response->assertCreated()->assertExactJson([
+            'id' => $response->json('id'),
+            'room_id' => $payload['room_id'],
+            'user_id' => $user->id,
+            'title' => 'Планёрка',
+            'starts_at' => '2026-11-10T07:00:00.000000Z',
+            'ends_at' => '2026-11-10T08:00:00.000000Z',
+            'created_at' => '2026-11-11T12:00:00.000000Z',
+            'updated_at' => '2026-11-11T12:00:00.000000Z',
+        ]);
         $this->assertDatabaseHas('bookings', [
             'id' => $response->json('id'), 'user_id' => $user->id,
             'starts_at' => '2026-11-10 07:00:00', 'ends_at' => '2026-11-10 08:00:00',

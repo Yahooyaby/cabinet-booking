@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateBookingRequest;
+use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\Room;
 use App\Services\BookingService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -23,9 +23,9 @@ class BookingController extends Controller
             ->paginate(20);
     }
 
-    public function store(CreateBookingRequest $request): JsonResponse
+    public function store(CreateBookingRequest $request): BookingResource
     {
-        return response()->json($this->bookings->create($request->toDto()), 201);
+        return new BookingResource($this->bookings->create($request->toDto()));
     }
 
     public function destroy(Request $request, int $id): Response
